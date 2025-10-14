@@ -21,7 +21,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/ucs_modular')
+mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://localhost:27017/ucs_modular')
   .then(() => console.log('MongoDB Connected'))
   .catch(err => {
     console.error(`MongoDB Connection Error: ${err.message}`);

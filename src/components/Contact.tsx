@@ -45,13 +45,27 @@ function Contact() {
         });
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description:
-          "Failed to send email: " +
-          (error instanceof Error ? error.message : "Unknown error"),
-        variant: "destructive",
-      });
+      // Check if it's a timeout error
+      if (error instanceof Error && error.message.includes('timed out')) {
+        toast({
+          title: "Connection Issue",
+          description: "The server is taking too long to respond. Please try again in a moment.",
+          variant: "destructive",
+        });
+      } else if (error instanceof TypeError && error.message.includes('fetch')) {
+        toast({
+          title: "Network Error",
+          description: "Unable to connect to the server. Please check your internet connection.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Something went wrong. Please try again later.",
+          variant: "destructive",
+        });
+      }
+      console.error("Contact form error:", error);
     } finally {
       setIsSending(false);
     }

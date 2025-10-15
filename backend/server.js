@@ -155,13 +155,35 @@ app.post("/api/send-email", (req, res) => {
 });
 
 // Get all contacts
-app.get('/api/contacts', async (req, res) => {
+app.get('/api/contacts', async (_req, res) => {
   try {
-    const contacts = await Contact.find({}).sort({ createdAt: -1 });
+    // Add timeout promise to handle MongoDB operation timeout
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Database operation timed out')), 8000);
+    });
+    
+    // Race the database query against the timeout
+    const contacts = await Promise.race([
+      Contact.find({}).sort({ createdAt: -1 }).exec(),
+      timeoutPromise
+    ]);
+    
     res.status(200).json(contacts);
   } catch (error) {
     console.error("Error fetching contacts:", error);
-    res.status(500).json({ success: false, message: error.message || "Failed to fetch contacts" });
+    
+    // Handle timeout error specifically
+    if (error.message.includes('timed out')) {
+      return res.status(503).json({ 
+        success: false, 
+        message: "Database is currently slow to respond. Please try again in a moment." 
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      message: "Unable to retrieve contacts. Please try again later." 
+    });
   }
 });
 

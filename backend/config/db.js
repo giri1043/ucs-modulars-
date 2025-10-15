@@ -3,11 +3,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const uri = "mongodb+srv://ucsmodulars:umapathy@123@clusterucs.tavakjc.mongodb.net/?retryWrites=true&w=majority&appName=Clusterucs";
+// Using environment variables for database connection
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://ucsmodulars:umapathy%40123@clusterucs.tavakjc.mongodb.net/?retryWrites=true&w=majority&appName=Clusterucs";
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(uri, {
+    const conn = await mongoose.connect(MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });

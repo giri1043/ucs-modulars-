@@ -97,9 +97,53 @@ app.post('/api/contacts', async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error sending email:", error);
-    res
-      .status(500)
-      .json({ success: false, message: error.message || "Failed to send email" });
+    
+    // Handle specific error types
+    if (error.code === 'EAUTH' || error.code === 'ESOCKET') {
+      return res.status(500).json({ 
+        success: false, 
+        message: "Email server connection failed. Your message was saved but email notification couldn't be sent." 
+      });
+    }
+    
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid data provided. Please check your form inputs." 
+      });
+    }
+    
+    if (error.name === 'MongoServerError' && error.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "This contact information has already been submitted." 
+      });
+    }
+    
+    // Save contact even if email fails
+    try {
+      if (!req.body.savedToDb) {
+        const contact = await Contact.create({
+          name: req.body.name,
+          email: req.body.email,
+          phone: req.body.phone || "",
+          message: req.body.message
+        });
+        
+        return res.status(201).json({ 
+          success: true, 
+          message: "Your message was saved but we couldn't send an email notification. We'll still contact you soon.",
+          contact
+        });
+      }
+    } catch (dbError) {
+      console.error("❌ Error saving to database:", dbError);
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      message: "Something went wrong. Please try again or contact us directly." 
+    });
   }
 });
 
@@ -111,7 +155,7 @@ app.post("/api/send-email", (req, res) => {
 });
 
 // Get all contacts
-app.get('/api/contacts', async (_req, res) => {
+app.get('/api/contacts', async (req, res) => {
   try {
     const contacts = await Contact.find({}).sort({ createdAt: -1 });
     res.status(200).json(contacts);

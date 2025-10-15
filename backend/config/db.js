@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const uri = "mongodb+srv://ucs-modulars:ucs_db_user@cluster0.zdlx2wk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = "mongodb+srv://ucsmodulars:umapathy@123@clusterucs.tavakjc.mongodb.net/?retryWrites=true&w=majority&appName=Clusterucs";
 
 const connectDB = async () => {
   try {

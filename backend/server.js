@@ -24,7 +24,14 @@ app.use(express.json());
 import connectDB from './config/db.js';
 
 // Connect to MongoDB using the configured connection
-connectDB();
+// The connection will fall back to local MongoDB if Atlas connection fails
+connectDB().then(connected => {
+  if (connected) {
+    console.log('✅ Database connection established successfully');
+  } else {
+    console.log('⚠️ Running with limited database functionality');
+  }
+});
 
 // Contact Schema
 const contactSchema = new mongoose.Schema(
@@ -127,4 +134,5 @@ if (process.env.NODE_ENV === 'production') {
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+const SERVER_URL = process.env.API_URL || `http://localhost:${PORT}`;
+app.listen(PORT, () => console.log(`✅ Server running on ${SERVER_URL}`));

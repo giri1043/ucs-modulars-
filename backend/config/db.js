@@ -4,18 +4,17 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Using environment variables for database connection
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://ucsmodulars:umapathy%40123@clusterucs.tavakjc.mongodb.net/?retryWrites=true&w=majority&appName=Clusterucs";
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/ucs_modular";
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    const conn = await mongoose.connect(MONGO_URI);
     console.log(`MongoDB connected successfully: ${conn.connection.host}`);
+    return true;
   } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1);
+    console.error('MongoDB connection error:', error.message);
+    // Don't exit the process, allow the application to continue with limited functionality
+    return false;
   }
 };
 

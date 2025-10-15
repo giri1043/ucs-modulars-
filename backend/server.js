@@ -20,13 +20,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://localhost:27017/ucs_modular')
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => {
-    console.error(`MongoDB Connection Error: ${err.message}`);
-    // Continue even if MongoDB fails - for backward compatibility
-  });
+// Import database connection
+import connectDB from './config/db.js';
+
+// Connect to MongoDB using the configured connection
+connectDB();
 
 // Contact Schema
 const contactSchema = new mongoose.Schema(
@@ -106,7 +104,7 @@ app.post("/api/send-email", (req, res) => {
 });
 
 // Get all contacts
-app.get('/api/contacts', async (req, res) => {
+app.get('/api/contacts', async (_req, res) => {
   try {
     const contacts = await Contact.find({}).sort({ createdAt: -1 });
     res.status(200).json(contacts);
@@ -122,7 +120,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../dist')));
 
   // Any route that is not api will be redirected to index.html
-  app.get('*', (req, res) => {
+  app.get('*', (_req, res) => {
     res.sendFile(path.resolve(__dirname, '../dist', 'index.html'));
   });
 }
